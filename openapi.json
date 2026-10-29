@@ -1,0 +1,211 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Chaktorpai Draft Preparation",
+    "version": "0.2.0",
+    "description": "Creates drafts only. Live publishing requires owner review outside GPT."
+  },
+  "servers": [
+    {
+      "url": "https://your-publisher.example.com"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/connections": {
+      "get": {
+        "operationId": "getConnections",
+        "summary": "Read live account identity and current connection errors",
+        "responses": {
+          "200": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drafts": {
+      "post": {
+        "operationId": "createDraft",
+        "summary": "Save a draft for owner review; does not publish",
+        "x-openai-isConsequential": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "videoUrl",
+                  "platforms",
+                  "captions"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "videoUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "platforms": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "facebook",
+                        "instagram",
+                        "tiktok",
+                        "youtube"
+                      ]
+                    }
+                  },
+                  "captions": {
+                    "type": "object",
+                    "properties": {
+                      "facebook": {
+                        "type": "string"
+                      },
+                      "instagram": {
+                        "type": "string"
+                      },
+                      "tiktok": {
+                        "type": "string"
+                      },
+                      "youtube": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "durationSeconds": {
+                    "type": "number",
+                    "description": "Required for TikTok duration eligibility"
+                  },
+                  "options": {
+                    "type": "object",
+                    "properties": {
+                      "tiktok": {
+                        "type": "object",
+                        "properties": {
+                          "privacyLevel": {
+                            "type": "string"
+                          },
+                          "consent": {
+                            "type": "boolean",
+                            "description": "Only true when the user explicitly consented to the selected TikTok content and account"
+                          },
+                          "disableComment": {
+                            "type": "boolean"
+                          },
+                          "disableDuet": {
+                            "type": "boolean"
+                          },
+                          "disableStitch": {
+                            "type": "boolean"
+                          },
+                          "brandContentToggle": {
+                            "type": "boolean"
+                          },
+                          "brandOrganicToggle": {
+                            "type": "boolean"
+                          },
+                          "isAigc": {
+                            "type": "boolean"
+                          }
+                        }
+                      },
+                      "youtube": {
+                        "type": "object",
+                        "properties": {
+                          "privacyStatus": {
+                            "type": "string",
+                            "enum": [
+                              "private",
+                              "unlisted",
+                              "public"
+                            ]
+                          },
+                          "madeForKids": {
+                            "type": "boolean"
+                          },
+                          "containsSyntheticMedia": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drafts/{id}": {
+      "get": {
+        "operationId": "getDraft",
+        "summary": "Read draft and per-platform status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
